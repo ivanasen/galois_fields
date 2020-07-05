@@ -79,7 +79,6 @@ vector<Polynomial> findFieldElements(const Polynomial& p) {
     return res;
 }
 
-// The polynomial p is assumed to be irreducable
 bool isPrimitive(const Polynomial& p) {
     int deg = degree(p);
 
@@ -195,14 +194,21 @@ int main() {
             "testing reasons):\n";
     prettyPrint(candidates);
 
+    bool found = false;
     for (Polynomial& p : candidates) {
         if (!isPrimitive(p)) {
             continue;
         }
 
+        found = true;
         cout << "Found primitive polynomial: ";
         prettyPrint(p);
         printField(p);
+        break;
+    }
+
+    if (!found) {
+        cout << "None of the candidate polynomials are primitive.\n";
     }
 
     return 0;
