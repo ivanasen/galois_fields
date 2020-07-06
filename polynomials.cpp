@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <bitset>
 #include <iostream>
 #include <vector>
@@ -63,7 +64,7 @@ Polynomial operator*(const Polynomial& a, const Polynomial& b) {
     return total;
 }
 
-// The polynomial p is assumed to be irreducable
+// The polynomial p is assumed to be primitive
 vector<Polynomial> findFieldElements(const Polynomial& p) {
     Polynomial first(0b1);
     Polynomial alpha(0b10);
@@ -126,6 +127,36 @@ void prettyPrint(const vector<Polynomial>& polynomials) {
     }
 }
 
+// The polynomial p is assumed to be primitive
+void printField(const Polynomial& p) {
+    vector<Polynomial> field = findFieldElements(p);
+
+    cout << "Field size: " << field.size() << '\n';
+    cout << "Field elements:\n";
+    cout << "----------------------------------\n";
+    prettyPrint(field);
+    cout << "----------------------------------\n";
+}
+
+void runApplication(vector<Polynomial>& candidates) {
+    bool found = false;
+    for (Polynomial& p : candidates) {
+        if (!isPrimitive(p)) {
+            continue;
+        }
+
+        found = true;
+        cout << "Found primitive polynomial: ";
+        prettyPrint(p);
+        printField(p);
+        break;
+    }
+
+    if (!found) {
+        cout << "None of the candidate polynomials are primitive.\n";
+    }
+}
+
 void testRemainder() {
     cout << "Remainder tests:\n";
     cout << (Polynomial(0b11111101111110) % Polynomial(0b100011011) ==
@@ -161,22 +192,47 @@ void testFindFieldElements() {
     cout << isPrimitive(a) << '\n';
 }
 
+void testApplication() {
+    vector<Polynomial> candidates{Polynomial("1000001"), Polynomial("1001001"),
+                                  Polynomial("1100001")};
+    runApplication(candidates);
+}
+
 void runTests() {
     testAddition();
     testMultiplication();
     testRemainder();
     testFindFieldElements();
+    testApplication();
 }
 
-// The polynomial p is assumed to be irreducable and primitive
-void printField(const Polynomial& p) {
-    vector<Polynomial> field = findFieldElements(p);
+vector<Polynomial> readInput() {
+    cout << "Polynomials are displayed in degree increasing order.\n\n";
 
-    cout << "Field size: " << field.size() << '\n';
-    cout << "Field elements:\n";
-    cout << "----------------------------------\n";
-    prettyPrint(field);
-    cout << "----------------------------------\n";
+    cout << "Enter degree of polynomials you want to use to generate the "
+            "field: ";
+    int deg;
+    cin >> deg;
+
+    cout << "Enter primitive polynomial candidates count: ";
+    int count;
+    cin >> count;
+
+    cout << "Enter polynomials in binary format in increasing degree order "
+            "seperately on new lines:\n";
+    vector<Polynomial> candidates(count);
+    for (int i = 0; i < count; i++) {
+        string polynomial;
+        cin >> polynomial;
+        if (polynomial.size() != deg + 1 || polynomial.back() != '1') {
+            cout << "Invalid polynomial input!\n";
+            return {};
+        }
+        reverse(polynomial.begin(), polynomial.end());
+        candidates[i] = Polynomial(polynomial);
+    }
+
+    return candidates;
 }
 
 int main() {
@@ -185,31 +241,7 @@ int main() {
         return 0;
     }
 
-    cout << "Polynomials are displayed in degree increasing order.\n\n";
-
-    vector<Polynomial> candidates{Polynomial(0b1000001), Polynomial(0b0000001),
-                                  Polynomial(0b1001001), Polynomial(0b1000011)};
-
-    cout << "Candidates for primitive polynomials are (I've added more for "
-            "testing reasons):\n";
-    prettyPrint(candidates);
-
-    bool found = false;
-    for (Polynomial& p : candidates) {
-        if (!isPrimitive(p)) {
-            continue;
-        }
-
-        found = true;
-        cout << "Found primitive polynomial: ";
-        prettyPrint(p);
-        printField(p);
-        break;
-    }
-
-    if (!found) {
-        cout << "None of the candidate polynomials are primitive.\n";
-    }
-
+    vector<Polynomial> candidates = readInput();
+    runApplication(candidates);
     return 0;
 }
