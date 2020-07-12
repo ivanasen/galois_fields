@@ -20,11 +20,9 @@ using Polynomial = bitset<SIZE>;
 Polynomial operator+(const Polynomial& a, const Polynomial& b) { return a ^ b; }
 
 int degree(const Polynomial& a) {
-    int deg = SIZE - 1;
-    for (; deg > 0; deg--) {
-        if (a[deg]) {
-            break;
-        }
+    int deg = a.size() - 1;
+    while (deg > 0 && !a[deg]) {
+        deg--;
     }
     return deg;
 }
